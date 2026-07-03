@@ -1,5 +1,5 @@
 """
-MacBookFans — Variable fan speed control for MacBook Pro (Apple Silicon)
+FANcy — Variable fan speed control for MacBook Pro (Apple Silicon)
 
 Native macOS look & feel with system light/dark mode support.
 Features: manual control, "All Fans" slider, interactive fan curve editor,
