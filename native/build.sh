@@ -1,0 +1,60 @@
+#!/bin/bash
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+BUILD_DIR="$SCRIPT_DIR/build"
+APP_DIR="$BUILD_DIR/FANcy.app"
+CONTENTS="$APP_DIR/Contents"
+MACOS="$CONTENTS/MacOS"
+RESOURCES="$CONTENTS/Resources"
+
+echo "🔨 Building FANcy..."
+
+# Clean
+rm -rf "$BUILD_DIR"
+mkdir -p "$MACOS" "$RESOURCES"
+
+# Copy Info.plist
+cp "$SCRIPT_DIR/Resources/Info.plist" "$CONTENTS/"
+
+# ── 1. Compile main app ──
+
+swiftc -O \
+    -target arm64-apple-macos13.0 \
+    -sdk $(xcrun --show-sdk-path) \
+    -import-objc-header "$SCRIPT_DIR/SMCBridge.h" \
+    "$SCRIPT_DIR/SMCBridge.c" \
+    "$SCRIPT_DIR"/Sources/*.swift \
+    -framework IOKit \
+    -framework CoreFoundation \
+    -o "$MACOS/FANcy"
+
+echo "  ✅ FANcy app compiled"
+
+# ── 2. Compile privileged helper ──
+
+cc -O2 \
+    -target arm64-apple-macos13.0 \
+    -o "$MACOS/FANcyHelper" \
+    "$SCRIPT_DIR/helper_main.c" \
+    "$SCRIPT_DIR/SMCBridge.c" \
+    -framework IOKit \
+    -framework CoreFoundation
+
+echo "  ✅ FANcy Helper compiled"
+
+# ── 3. Generate app icon ──
+
+swift "$SCRIPT_DIR/generate_icon.swift" "$RESOURCES" 2>&1 || echo "  ⚠️  Icon generation skipped"
+
+echo ""
+echo "✅ Built: $APP_DIR"
+echo ""
+echo "── Run ────────────────────────────────────────"
+echo "  open \"$APP_DIR\""
+echo ""
+echo "── Install Helper (one-time, for fan control) ─"
+echo "  Click 'Install' in the app's HELPER section."
+echo ""
+echo "── Or run with sudo (development) ──────────────"
+echo "  sudo \"$MACOS/FANcy\""

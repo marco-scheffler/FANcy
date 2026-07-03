@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Compiled SMC helper (build with `make`)
+smc_helper
+
+# Native macOS app build output
+native/build/
+
+# Runtime state (fan curve is regenerated from DEFAULT_CURVE on first run)
+fan_curve.json
