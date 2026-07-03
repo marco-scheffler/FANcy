@@ -7,7 +7,7 @@
 **Take control of your MacBook's fans.**
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
 ![Platform](https://img.shields.io/badge/Platform-macOS%2013%2B-lightgrey.svg)
 ![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-required-black.svg)
 ![Built with](https://img.shields.io/badge/SwiftUI%20%C2%B7%20SMC-orange.svg)
@@ -53,8 +53,10 @@ Download **`FANcy-<version>.dmg`** from the [latest release](https://github.com/
 open it, and drag **FANcy** into **Applications**. The app is signed and **notarized by Apple**, so it
 launches straight from a double-click — no Gatekeeper warnings, no `xattr` workaround needed.
 
-On first launch, open the **HELPER** section and click **Install** — a one-time admin prompt that sets
-up the small privileged helper FANcy uses to write fan speeds. That's it.
+On first launch, open the **HELPER** section and click **Install**, then enable **FANcy** under
+**System Settings → General → Login Items & Extensions**. That one-time approval starts the small
+privileged helper FANcy uses to write fan speeds — registered the modern way via `SMAppService`, so
+it stays versioned with the app.
 
 ### Build from source
 
@@ -87,7 +89,8 @@ python3 app.py               # writes need sudo
 
 A small C bridge (`SMCBridge.c` / `smc_helper.c`) reads and writes SMC keys through **IOKit** — fan
 RPM, targets, and temperature sensors. Fan **writes** are privileged, so the native app ships a
-minimal helper (`FANcyHelper`) that performs them; the Python prototype uses `sudo` instead. On exit —
+minimal helper (`FANcyHelper`), registered as a root LaunchDaemon via **`SMAppService`** (macOS's
+modern login-items mechanism), that performs them; the Python prototype uses `sudo` instead. On exit —
 clean or not — FANcy hands the fans back to macOS's automatic control, and a crash-guard file lets it
 recover if the app was killed mid-session.
 

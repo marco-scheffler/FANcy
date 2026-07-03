@@ -47,6 +47,8 @@ enum L10n {
     static var install: String { loc("Install", de: "Installieren") }
     static var installing: String { loc("Installing...", de: "Installiere...") }
     static var remove: String { loc("Remove", de: "Entfernen") }
+    static var approvalNeeded: String { loc("Enable it in Login Items to finish", de: "Zum Abschluss in Anmeldeobjekten aktivieren") }
+    static var openSettings: String { loc("Open Settings", de: "Einstellungen öffnen") }
 
     // MARK: - Appearance
     static var system: String { loc("System", de: "System") }

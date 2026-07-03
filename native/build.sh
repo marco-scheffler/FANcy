@@ -43,6 +43,13 @@ cc -O2 \
 
 echo "  ✅ FANcy Helper compiled"
 
+# ── 2b. Bundle the LaunchDaemon plist for SMAppService ──
+
+mkdir -p "$CONTENTS/Library/LaunchDaemons"
+cp "$SCRIPT_DIR/Resources/com.fancy.helper.plist" "$CONTENTS/Library/LaunchDaemons/"
+
+echo "  ✅ Helper LaunchDaemon bundled"
+
 # ── 3. Generate app icon ──
 
 swift "$SCRIPT_DIR/generate_icon.swift" "$RESOURCES" 2>&1 || echo "  ⚠️  Icon generation skipped"
@@ -54,7 +61,9 @@ echo "── Run ─────────────────────
 echo "  open \"$APP_DIR\""
 echo ""
 echo "── Install Helper (one-time, for fan control) ─"
-echo "  Click 'Install' in the app's HELPER section."
+echo "  Click 'Install' in the app's HELPER section, then enable FANcy"
+echo "  under System Settings → General → Login Items & Extensions."
+echo "  (Requires the signed/notarized app — see native/package.sh.)"
 echo ""
 echo "── Or run with sudo (development) ──────────────"
 echo "  sudo \"$MACOS/FANcy\""

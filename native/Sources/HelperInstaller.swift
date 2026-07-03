@@ -1,28 +1,63 @@
 import Foundation
-import AppKit
+import ServiceManagement
 
-/// Manages installation and communication with the privileged helper tool.
-/// The helper is a small binary that listens on a Unix domain socket for
-/// fan control commands, running as root via a LaunchDaemon.
+/// Manages the privileged helper via SMAppService (macOS 13+).
+///
+/// The helper is a LaunchDaemon bundled at
+/// `Contents/Library/LaunchDaemons/com.fancy.helper.plist`, running as root and
+/// listening on a Unix domain socket for fan-control commands from the app.
+///
+/// Registration is the modern login-items flow: `register()` enrols the daemon;
+/// the user enables it once under System Settings → Login Items, after which the
+/// status becomes `.enabled` and the helper runs.
 enum HelperInstaller {
-    static let helperID = "com.fancy.helper"
+    static let plistName = "com.fancy.helper.plist"
     static let socketPath = "/tmp/fancy-fan.sock"
 
-    private static var daemonPlist: URL {
-        URL(fileURLWithPath: "/Library/LaunchDaemons/\(helperID).plist")
+    private static var service: SMAppService {
+        SMAppService.daemon(plistName: plistName)
     }
 
-    private static var helperBinary: URL {
-        URL(fileURLWithPath: "/Library/PrivilegedHelperTools/\(helperID)")
+    /// Current registration status.
+    static var status: SMAppService.Status { service.status }
+
+    /// Helper is registered AND approved by the user (running).
+    static var isInstalled: Bool { service.status == .enabled }
+
+    /// Registered, but the user still has to enable it in Login Items.
+    static var needsApproval: Bool { service.status == .requiresApproval }
+
+    /// Register the daemon. Returns `nil` on success, or an error message.
+    /// After a successful call the status is `.enabled` or `.requiresApproval`
+    /// (the user must toggle it on in System Settings → Login Items).
+    @discardableResult
+    static func install() -> String? {
+        do {
+            try service.register()
+            return nil
+        } catch {
+            NSLog("FANcy: helper register failed: \(error.localizedDescription)")
+            return error.localizedDescription
+        }
     }
 
-    /// Check if the helper is installed and running.
-    static var isInstalled: Bool {
-        FileManager.default.fileExists(atPath: helperBinary.path) &&
-        FileManager.default.fileExists(atPath: daemonPlist.path)
+    /// Unregister the daemon. Fire-and-forget; observe `status` for the result.
+    static func uninstall() {
+        Task {
+            do {
+                try await service.unregister()
+            } catch {
+                NSLog("FANcy: helper unregister failed: \(error.localizedDescription)")
+            }
+        }
     }
 
-    /// Send a command to the helper via Unix socket. Returns response string.
+    /// Open System Settings → Login Items so the user can enable the helper.
+    static func openLoginItemsSettings() {
+        SMAppService.openSystemSettingsLoginItems()
+    }
+
+    /// Send a command to the helper via Unix socket. Returns the response string.
     static func sendCommand(_ cmd: String) -> String? {
         let sock = socket(AF_UNIX, SOCK_STREAM, 0)
         guard sock >= 0 else { return nil }
@@ -56,85 +91,5 @@ enum HelperInstaller {
         let n = recv(sock, &buffer, buffer.count, 0)
         guard n > 0 else { return nil }
         return String(bytes: buffer[0..<n], encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    /// Install the helper tool (requires admin password via osascript).
-    static func install(appBundlePath: String) -> Bool {
-        // The helper binary is embedded in the app bundle
-        let srcHelper = appBundlePath + "/Contents/MacOS/FANcyHelper"
-        guard FileManager.default.fileExists(atPath: srcHelper) else {
-            print("Helper binary not found at \(srcHelper)")
-            return false
-        }
-
-        let plistContent = """
-        <?xml version="1.0" encoding="UTF-8"?>
-        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-        <plist version="1.0">
-        <dict>
-            <key>Label</key>
-            <string>\(helperID)</string>
-            <key>ProgramArguments</key>
-            <array>
-                <string>\(helperBinary.path)</string>
-            </array>
-            <key>RunAtLoad</key>
-            <true/>
-            <key>KeepAlive</key>
-            <true/>
-            <key>StandardErrorPath</key>
-            <string>/tmp/fancy-helper.log</string>
-        </dict>
-        </plist>
-        """
-
-        // Write plist to temp, then use osascript to move it with admin privs
-        let tmpPlist = "/tmp/\(helperID).plist"
-        try? plistContent.write(toFile: tmpPlist, atomically: true, encoding: .utf8)
-
-        let script = """
-        do shell script "mkdir -p /Library/PrivilegedHelperTools && \
-        cp '\(srcHelper)' '\(helperBinary.path)' && \
-        chmod 755 '\(helperBinary.path)' && \
-        chown root:wheel '\(helperBinary.path)' && \
-        cp '\(tmpPlist)' '\(daemonPlist.path)' && \
-        chown root:wheel '\(daemonPlist.path)' && \
-        launchctl bootout system/\(helperID) 2>/dev/null; \
-        launchctl bootstrap system '\(daemonPlist.path)'" \
-        with administrator privileges
-        """
-
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
-        task.arguments = ["-e", script]
-
-        do {
-            try task.run()
-            task.waitUntilExit()
-            return task.terminationStatus == 0
-        } catch {
-            return false
-        }
-    }
-
-    /// Uninstall the helper.
-    static func uninstall() -> Bool {
-        let script = """
-        do shell script "launchctl bootout system/\(helperID) 2>/dev/null; \
-        rm -f '\(helperBinary.path)' '\(daemonPlist.path)'" \
-        with administrator privileges
-        """
-
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
-        task.arguments = ["-e", script]
-
-        do {
-            try task.run()
-            task.waitUntilExit()
-            return task.terminationStatus == 0
-        } catch {
-            return false
-        }
     }
 }

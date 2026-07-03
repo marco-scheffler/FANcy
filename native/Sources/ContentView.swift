@@ -555,51 +555,92 @@ struct FanSliderRow: View {
 // MARK: - Helper Status Card (compact)
 
 struct HelperStatusCard: View {
-    @State private var installed = HelperInstaller.isInstalled
+    @State private var status = HelperInstaller.status
     @State private var installing = false
+    @State private var errorMsg: String?
+
+    // Poll so the card reflects the Login-Items toggle when the user returns.
+    private let poll = Timer.publish(every: 2, on: .main, in: .common).autoconnect()
 
     var body: some View {
         GroupBox {
             HStack(spacing: 8) {
-                Image(systemName: installed ? "checkmark.shield.fill" : "shield.slash")
+                Image(systemName: iconName)
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.white)
                     .frame(width: 24, height: 24)
-                    .background(installed ? Color.green : Color.red,
-                                in: RoundedRectangle(cornerRadius: 5))
+                    .background(iconColor, in: RoundedRectangle(cornerRadius: 5))
                 VStack(alignment: .leading, spacing: 1) {
                     Text(L10n.privilegedHelper).font(.system(size: 13))
-                    Text(installed ? L10n.installed : L10n.required)
+                    Text(errorMsg ?? statusText)
                         .font(.system(size: 10))
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                 }
                 Spacer()
-                if !installed {
-                    Button(installing ? L10n.installing : L10n.install) { installHelper() }
-                        .disabled(installing)
-                        .buttonStyle(.plain)
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.accentColor)
-                } else {
-                    Button(L10n.remove) {
-                        if HelperInstaller.uninstall() { installed = false }
-                    }
-                    .buttonStyle(.plain)
-                    .font(.system(size: 12))
-                    .foregroundColor(.secondary)
-                }
+                actionButton
             }
             .padding(.vertical, 2)
             .padding(.horizontal, 2)
+        }
+        .onReceive(poll) { _ in status = HelperInstaller.status }
+    }
+
+    private var iconName: String {
+        switch status {
+        case .enabled: return "checkmark.shield.fill"
+        case .requiresApproval: return "exclamationmark.shield.fill"
+        default: return "shield.slash"
+        }
+    }
+
+    private var iconColor: Color {
+        switch status {
+        case .enabled: return .green
+        case .requiresApproval: return .orange
+        default: return .red
+        }
+    }
+
+    private var statusText: String {
+        switch status {
+        case .enabled: return L10n.installed
+        case .requiresApproval: return L10n.approvalNeeded
+        default: return L10n.required
+        }
+    }
+
+    @ViewBuilder private var actionButton: some View {
+        switch status {
+        case .enabled:
+            Button(L10n.remove) { HelperInstaller.uninstall() }
+                .buttonStyle(.plain)
+                .font(.system(size: 12))
+                .foregroundColor(.secondary)
+        case .requiresApproval:
+            Button(L10n.openSettings) { HelperInstaller.openLoginItemsSettings() }
+                .buttonStyle(.plain)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(.accentColor)
+        default:
+            Button(installing ? L10n.installing : L10n.install) { installHelper() }
+                .disabled(installing)
+                .buttonStyle(.plain)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(.accentColor)
         }
     }
 
     func installHelper() {
         installing = true
+        errorMsg = nil
         DispatchQueue.global().async {
-            let success = HelperInstaller.install(appBundlePath: Bundle.main.bundlePath)
-            DispatchQueue.main.async { installed = success; installing = false }
+            let err = HelperInstaller.install()
+            DispatchQueue.main.async {
+                errorMsg = err
+                status = HelperInstaller.status
+                installing = false
+            }
         }
     }
 }
