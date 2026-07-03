@@ -36,7 +36,7 @@ temperature→speed curve, or hand control straight back to macOS whenever you l
 - 🖥️ **Menu bar extra** — live CPU temp at a glance, with quick auto / curve / quit actions
 - 🍎 **Native macOS feel** — SwiftUI, automatic light/dark mode, no Electron, no web view
 - 🛟 **Crash guard** — if FANcy ever exits uncleanly, automatic fan control is restored on next launch
-- 🔄 **Self-updating** — built-in Sparkle updater keeps you on the latest build
+- 🔄 **Update-ready** — a Sparkle integration point is wired in; drop in the framework + an appcast to enable auto-updates
 - 🔒 **Local & minimal privilege** — SMC writes go through a tiny bundled helper; nothing leaves your Mac
 
 ## Requirements
@@ -88,7 +88,7 @@ recover if the app was killed mid-session.
 | Path | What it is |
 |---|---|
 | `native/` | The shipping **SwiftUI app** — `build.sh` produces `FANcy.app` |
-| `native/Sources/` | App, views, fan-curve editor, SMC kit, helper installer, Sparkle updater |
+| `native/Sources/` | App, views, fan-curve editor, SMC kit, helper installer, Sparkle update hook |
 | `app.py` · `smc_helper.c` | The original **Python/Flet** prototype and its SMC helper |
 | `fan_curve.json` | Saved curve (regenerated from the built-in default if missing) |
 
