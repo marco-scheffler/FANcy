@@ -47,7 +47,16 @@ temperature→speed curve, or hand control straight back to macOS whenever you l
 
 ## Quick start
 
-### Native app (recommended)
+### Install (recommended)
+
+Download **`FANcy-<version>.dmg`** from the [latest release](https://github.com/marco-scheffler/FANcy/releases/latest),
+open it, and drag **FANcy** into **Applications**. The app is signed and **notarized by Apple**, so it
+launches straight from a double-click — no Gatekeeper warnings, no `xattr` workaround needed.
+
+On first launch, open the **HELPER** section and click **Install** — a one-time admin prompt that sets
+up the small privileged helper FANcy uses to write fan speeds. That's it.
+
+### Build from source
 
 ```bash
 cd native
@@ -55,8 +64,7 @@ cd native
 open build/FANcy.app
 ```
 
-On first launch, open the **HELPER** section and click **Install** — that sets up the small
-privileged helper FANcy uses to write fan speeds. That's it.
+To produce a signed, notarized DMG yourself, see [`native/package.sh`](native/package.sh).
 
 ### Python prototype
 
