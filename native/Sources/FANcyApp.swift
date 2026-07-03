@@ -3,24 +3,12 @@ import AppKit
 
 @main
 struct FANcyApp: App {
-    @StateObject private var state = AppState()
+    // Menu-bar-only app: the sole scene is the MenuBarExtra. The main window is
+    // opened on demand by MainWindowController (see MainWindow.swift).
+    @ObservedObject private var state = AppState.shared
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
-        WindowGroup {
-            ContentView()
-                .environmentObject(state)
-                .preferredColorScheme(state.colorScheme)
-                .frame(minWidth: 680, minHeight: 700)
-        }
-        .windowStyle(.titleBar)
-        .windowResizability(.contentSize)
-        .defaultSize(width: 740, height: 880)
-        .commands {
-            CommandGroup(replacing: .newItem) { }
-        }
-
-        // Menu bar extra — shows CPU temp in menu bar
         MenuBarExtra {
             MenuBarView()
                 .environmentObject(state)
@@ -74,22 +62,24 @@ struct MenuBarView: View {
 
         Divider()
 
+        // Quick actions — work while the menu is open
         Button(L10n.automatic) { state.restoreAuto() }
+            .keyboardShortcut("0", modifiers: .command)
             .disabled(state.mode == .auto)
+        Button(L10n.silent) { state.selectProfile(.silent) }
+            .keyboardShortcut("1", modifiers: .command)
+            .disabled(state.mode == .curve && state.activeProfile == .silent)
+        Button(L10n.performance) { state.selectProfile(.performance) }
+            .keyboardShortcut("2", modifiers: .command)
+            .disabled(state.mode == .curve && state.activeProfile == .performance)
+
         Button(L10n.activateFanCurve) { state.activateCurve() }
             .disabled(state.mode == .curve)
 
         Divider()
 
-        Button(L10n.openFANcy) {
-            NSApp.activate(ignoringOtherApps: true)
-            for w in NSApp.windows where !w.title.isEmpty && w.title != "Item-0" {
-                w.makeKeyAndOrderFront(nil)
-                return
-            }
-            NSApp.activate(ignoringOtherApps: true)
-        }
-        .keyboardShortcut("o")
+        Button(L10n.openFANcy) { MainWindowController.shared.show() }
+            .keyboardShortcut("o")
 
         Button(L10n.quitFANcy) {
             SMCKit.restoreAllAuto()

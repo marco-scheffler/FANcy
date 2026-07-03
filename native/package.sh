@@ -21,7 +21,7 @@ APP="$BUILD_DIR/FANcy.app"
 
 IDENTITY="${FANCY_SIGN_ID:-Developer ID Application: Marco Scheffler (7YN7YUH475)}"
 NOTARY_PROFILE="${FANCY_NOTARY_PROFILE:-fancy-notary}"
-VERSION="${FANCY_VERSION:-1.1.0}"
+VERSION="${FANCY_VERSION:-1.2.0}"
 DMG="$BUILD_DIR/FANcy-$VERSION.dmg"
 
 echo "▸ Building app…"

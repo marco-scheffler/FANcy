@@ -27,6 +27,9 @@ struct TempSample: Identifiable {
 
 /// Central app state.
 final class AppState: ObservableObject {
+    /// Shared instance — the menu bar and the on-demand window use the same state.
+    static let shared = AppState()
+
     @Published var cpuTemp: Double = -1
     @Published var gpuTemp: Double = -1
     @Published var fans: [FanInfo] = []

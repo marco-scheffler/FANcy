@@ -7,7 +7,7 @@
 **Take control of your MacBook's fans.**
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
-![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)
 ![Platform](https://img.shields.io/badge/Platform-macOS%2013%2B-lightgrey.svg)
 ![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-required-black.svg)
 ![Built with](https://img.shields.io/badge/SwiftUI%20%C2%B7%20SMC-orange.svg)
@@ -33,7 +33,7 @@ temperature→speed curve, or hand control straight back to macOS whenever you l
 - 🎛️ **Manual control** — set each fan by RPM, or move every fan at once with the **All Fans** slider
 - 📈 **Interactive fan curve** — drag points on a live temp→speed graph; FANcy interpolates the rest
 - 🌡️ **Hysteresis** — a deadband around each threshold so fans don't hunt and oscillate
-- 🖥️ **Menu bar extra** — live CPU temp at a glance, with quick auto / curve / quit actions
+- 🖥️ **Lives in the menu bar** — no Dock clutter; live CPU temp in the menu bar with quick-action shortcuts (⌘0 Auto · ⌘1 Silent · ⌘2 Performance). Open the full window only when you need it.
 - 🍎 **Native macOS feel** — SwiftUI, automatic light/dark mode, no Electron, no web view
 - 🛟 **Crash guard** — if FANcy ever exits uncleanly, automatic fan control is restored on next launch
 - 🔄 **Update-ready** — a Sparkle integration point is wired in; drop in the framework + an appcast to enable auto-updates
