@@ -49,6 +49,12 @@ enum L10n {
     static var remove: String { loc("Remove", de: "Entfernen") }
     static var approvalNeeded: String { loc("Enable it in Login Items to finish", de: "Zum Abschluss in Anmeldeobjekten aktivieren") }
     static var openSettings: String { loc("Open Settings", de: "Einstellungen öffnen") }
+    static var finishSetup: String { loc("Approve…", de: "Freigeben…") }
+    static var approvalTitle: String { loc("Almost done — approve the helper", de: "Fast fertig — Helper freigeben") }
+    static var approvalStep1: String { loc("Click “Open Settings” below", de: "Unten „Einstellungen öffnen“ klicken") }
+    static var approvalStep2: String { loc("Scroll to “Allow in the Background”", de: "Zum Abschnitt „Im Hintergrund erlauben“ scrollen") }
+    static var approvalStep3: String { loc("Turn on the switch next to FANcy", de: "Den Schalter neben FANcy einschalten") }
+    static var approvalAutoDetect: String { loc("FANcy detects the approval automatically.", de: "FANcy erkennt die Freigabe automatisch.") }
 
     // MARK: - Appearance
     static var system: String { loc("System", de: "System") }

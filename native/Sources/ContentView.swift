@@ -558,6 +558,7 @@ struct HelperStatusCard: View {
     @State private var status = HelperInstaller.status
     @State private var installing = false
     @State private var errorMsg: String?
+    @State private var showGuide = false
 
     // Poll so the card reflects the Login-Items toggle when the user returns.
     private let poll = Timer.publish(every: 2, on: .main, in: .common).autoconnect()
@@ -583,7 +584,13 @@ struct HelperStatusCard: View {
             .padding(.vertical, 2)
             .padding(.horizontal, 2)
         }
-        .onReceive(poll) { _ in status = HelperInstaller.status }
+        .popover(isPresented: $showGuide, arrowEdge: .bottom) {
+            HelperApprovalGuide()
+        }
+        .onReceive(poll) { _ in
+            status = HelperInstaller.status
+            if status == .enabled { showGuide = false }
+        }
     }
 
     private var iconName: String {
@@ -618,7 +625,7 @@ struct HelperStatusCard: View {
                 .font(.system(size: 12))
                 .foregroundColor(.secondary)
         case .requiresApproval:
-            Button(L10n.openSettings) { HelperInstaller.openLoginItemsSettings() }
+            Button(L10n.finishSetup) { showGuide = true }
                 .buttonStyle(.plain)
                 .font(.system(size: 12, weight: .medium))
                 .foregroundColor(.accentColor)
@@ -640,7 +647,42 @@ struct HelperStatusCard: View {
                 errorMsg = err
                 status = HelperInstaller.status
                 installing = false
+                if status == .requiresApproval { showGuide = true }
             }
+        }
+    }
+}
+
+// MARK: - Helper Approval Guide (popover)
+
+struct HelperApprovalGuide: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(L10n.approvalTitle)
+                .font(.system(size: 13, weight: .semibold))
+            VStack(alignment: .leading, spacing: 6) {
+                step(1, L10n.approvalStep1)
+                step(2, L10n.approvalStep2)
+                step(3, L10n.approvalStep3)
+            }
+            Button(L10n.openSettings) { HelperInstaller.openLoginItemsSettings() }
+                .controlSize(.small)
+            Text(L10n.approvalAutoDetect)
+                .font(.system(size: 10))
+                .foregroundStyle(.secondary)
+        }
+        .padding(14)
+        .frame(width: 264)
+    }
+
+    @ViewBuilder private func step(_ n: Int, _ text: String) -> some View {
+        HStack(alignment: .top, spacing: 6) {
+            Text("\(n).")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(.secondary)
+            Text(text)
+                .font(.system(size: 11))
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }
