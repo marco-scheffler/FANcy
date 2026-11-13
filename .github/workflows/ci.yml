@@ -14,9 +14,9 @@ jobs:
     name: Core tests
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: .build
           key: spm-${{ runner.os }}-${{ hashFiles('Package.swift') }}
@@ -32,7 +32,7 @@ jobs:
     name: App build
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # The shipping app is built by swiftc, not by the Swift package, so
       # build it too — a passing `swift test` alone wouldn't catch a broken app.
