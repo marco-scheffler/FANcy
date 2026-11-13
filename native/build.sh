@@ -7,12 +7,17 @@ APP_DIR="$BUILD_DIR/FANcy.app"
 CONTENTS="$APP_DIR/Contents"
 MACOS="$CONTENTS/MacOS"
 RESOURCES="$CONTENTS/Resources"
+FRAMEWORKS="$CONTENTS/Frameworks"
+SPARKLE_DIR="$SCRIPT_DIR/vendor/Sparkle"
 
 echo "🔨 Building FANcy..."
 
+# Sparkle (auto-update) — pinned release, fetched once into native/vendor
+bash "$SCRIPT_DIR/fetch-sparkle.sh"
+
 # Clean
 rm -rf "$BUILD_DIR"
-mkdir -p "$MACOS" "$RESOURCES"
+mkdir -p "$MACOS" "$RESOURCES" "$FRAMEWORKS"
 
 # Copy Info.plist
 cp "$SCRIPT_DIR/Resources/Info.plist" "$CONTENTS/"
@@ -26,11 +31,17 @@ swiftc -O \
     "$SCRIPT_DIR/SMCBridge.c" \
     "$SCRIPT_DIR"/Core/*.swift \
     "$SCRIPT_DIR"/Sources/*.swift \
+    -F "$SPARKLE_DIR" \
+    -framework Sparkle \
+    -Xlinker -rpath -Xlinker @executable_path/../Frameworks \
     -framework IOKit \
     -framework CoreFoundation \
     -o "$MACOS/FANcy"
 
-echo "  ✅ FANcy app compiled"
+# ditto keeps the framework's internal symlinks intact (cp -R would not)
+ditto "$SPARKLE_DIR/Sparkle.framework" "$FRAMEWORKS/Sparkle.framework"
+
+echo "  ✅ FANcy app compiled (Sparkle embedded)"
 
 # ── 2. Compile privileged helper ──
 

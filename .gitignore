@@ -16,5 +16,13 @@ native/build/
 # Swift Package build output (swift build / swift test)
 .build/
 
+# Fetched third-party binaries (native/fetch-sparkle.sh)
+native/vendor/
+
+# Sparkle signing secrets — never commit. The private key lives in the
+# maintainer's Keychain; an exported backup belongs in a password manager.
+sparkle_private_key*
+*.sparkle-key
+
 # Runtime state (fan curve is regenerated from DEFAULT_CURVE on first run)
 fan_curve.json

@@ -64,6 +64,7 @@ enum L10n {
     // MARK: - Menu Bar
     static var openFANcy: String { loc("Open FANcy...", de: "FANcy öffnen...") }
     static var quitFANcy: String { loc("Quit FANcy", de: "FANcy beenden") }
+    static var checkForUpdates: String { loc("Check for Updates…", de: "Nach Updates suchen…") }
     static var activateFanCurve: String { loc("Activate Fan Curve", de: "Lüfterkurve aktivieren") }
 
     // MARK: - Notifications

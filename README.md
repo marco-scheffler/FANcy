@@ -7,7 +7,7 @@
 **Take control of your MacBook's fans.**
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
-![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)
 ![Platform](https://img.shields.io/badge/Platform-macOS%2013%2B-lightgrey.svg)
 ![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-required-black.svg)
 ![Built with](https://img.shields.io/badge/SwiftUI%20%C2%B7%20SMC-orange.svg)
@@ -37,7 +37,7 @@ temperature→speed curve, or hand control straight back to macOS whenever you l
 - 🖥️ **Lives in the menu bar** — no Dock clutter; live CPU temp in the menu bar with quick-action shortcuts (⌘0 Auto · ⌘1 Silent · ⌘2 Performance). Open the full window only when you need it.
 - 🍎 **Native macOS feel** — SwiftUI, automatic light/dark mode, no Electron, no web view
 - 🛟 **Crash guard** — if FANcy ever exits uncleanly, automatic fan control is restored on next launch
-- 🔄 **Update-ready** — a Sparkle integration point is wired in; drop in the framework + an appcast to enable auto-updates
+- 🔄 **Automatic updates** — checks daily via [Sparkle](https://sparkle-project.org); every download is EdDSA-signed and verified, and nothing installs without your click
 - 🔒 **Local & minimal privilege** — SMC writes go through a tiny bundled helper; nothing leaves your Mac
 
 ## Requirements
@@ -62,6 +62,10 @@ On first launch, open the **HELPER** section and click **Install**, then enable 
 **System Settings → General → Login Items & Extensions**. That one-time approval starts the small
 privileged helper FANcy uses to write fan speeds — registered the modern way via `SMAppService`, so
 it stays versioned with the app.
+
+From 1.3.0 on, FANcy keeps itself up to date: it checks once a day and offers new versions in-app
+(or use **Check for Updates…** in the menu bar). Coming from an older version? Install 1.3.0 once
+from the DMG.
 
 ### Build from source
 
@@ -105,8 +109,10 @@ recover if the app was killed mid-session.
 |---|---|
 | `native/` | The shipping **SwiftUI app** — `build.sh` produces `FANcy.app` |
 | `native/Core/` | Pure logic (fan curve, profiles, deadband, strings) — built into the app and unit-tested |
-| `native/Sources/` | App, views, fan-curve editor, SMC kit, helper installer, Sparkle update hook |
+| `native/Sources/` | App, views, fan-curve editor, SMC kit, helper installer, Sparkle updater |
 | `Package.swift` · `Tests/` | Swift package wrapping `native/Core` for `swift test` |
+| `native/package.sh` | Release pipeline: sign, notarize, DMG, Sparkle signature + `appcast.xml` entry |
+| `appcast.xml` · `docs/release-notes/` | The update feed installed copies read, and the notes shown in it |
 | `app.py` · `smc_helper.c` | The original **Python/Flet** prototype and its SMC helper |
 | `fan_curve.json` | Saved curve (regenerated from the built-in default if missing) |
 
@@ -123,8 +129,10 @@ swift test
 
 Covers the fan-curve math (interpolation, RPM mapping, the deadband that stops fans from hunting),
 the saved-curve format, and the built-in profiles — including that every profile is monotonic and
-that Silent → Balanced → Performance → Gaming really get louder at every temperature. CI runs the
-tests and a full app build on every push.
+that Silent → Balanced → Performance → Gaming really get louder at every temperature — plus the
+update setup (feed URL, signing key, a well-formed and correctly ordered `appcast.xml`), where a
+mistake wouldn't crash anything but would silently stop every installed copy from updating. CI runs
+the tests and a full app build on every push.
 
 ## Safety & limitations
 
@@ -139,8 +147,8 @@ slow under sustained load lets your Mac get warmer. A few things keep that in ch
 
 Known limitations:
 
-- **No auto-update** yet — `SparkleUpdater.swift` is a wired-in integration point, not an active
-  updater. Grab new versions from [Releases](../../releases).
+- An update replaces the app right away, but the root **helper keeps running its old binary until the
+  next restart** — fine as long as the helper's protocol doesn't change between versions.
 - Only the **native app** is maintained for day-to-day use; `app.py` is the original prototype.
 
 ## License

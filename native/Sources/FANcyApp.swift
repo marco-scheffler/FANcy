@@ -81,6 +81,8 @@ struct MenuBarView: View {
         Button(L10n.openFANcy) { MainWindowController.shared.show() }
             .keyboardShortcut("o")
 
+        Button(L10n.checkForUpdates) { Updater.shared.checkForUpdates() }
+
         Button(L10n.quitFANcy) {
             SMCKit.restoreAllAuto()
             CrashGuard.removeGuardFile()
@@ -114,6 +116,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
         CrashGuard.writeGuardFile()
+
+        // Start Sparkle now, so its scheduled daily check runs from launch on —
+        // not only after the user first opens the menu.
+        _ = Updater.shared
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {

@@ -15,9 +15,9 @@
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleVersion</key>
-    <string>3</string>
+    <string>4</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.2.0</string>
+    <string>1.3.0</string>
     <key>LSMinimumSystemVersion</key>
     <string>13.0</string>
     <key>NSPrincipalClass</key>
@@ -27,6 +27,21 @@
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>LSUIElement</key>
+    <true/>
+    <!-- Sparkle auto-update. The appcast is committed to the repo and served
+         from main; Sparkle compares CFBundleVersion against it, so that number
+         must go up with every release. -->
+    <key>SUFeedURL</key>
+    <string>https://raw.githubusercontent.com/marco-scheffler/FANcy/main/appcast.xml</string>
+    <!-- The public half of the EdDSA key every update is signed with. Public on
+         purpose: each copy of the app uses it to check that a download really
+         came from here. The private half lives only in the maintainer's
+         Keychain (account "fancy") — whoever holds it can ship code to every
+         FANcy user, past notarization. -->
+    <key>SUPublicEDKey</key>
+    <string>STuwdJP2TEGr6jrHbgRAox9dUSv//MFr6rLiX8mx2Mk=</string>
+    <!-- Check daily without asking first; installing still always needs a click. -->
+    <key>SUEnableAutomaticChecks</key>
     <true/>
 </dict>
 </plist>
