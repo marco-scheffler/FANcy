@@ -18,7 +18,7 @@ if [[ -f "$STAMP" && "$(cat "$STAMP")" == "$SPARKLE_VERSION" ]]; then
     exit 0
 fi
 
-echo "▸ Fetching Sparkle $SPARKLE_VERSION…"
+echo "▸ Fetching Sparkle ${SPARKLE_VERSION}…"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 curl -fsSL -o "$TMP/sparkle.tar.xz" \
