@@ -24,6 +24,7 @@ swiftc -O \
     -sdk $(xcrun --show-sdk-path) \
     -import-objc-header "$SCRIPT_DIR/SMCBridge.h" \
     "$SCRIPT_DIR/SMCBridge.c" \
+    "$SCRIPT_DIR"/Core/*.swift \
     "$SCRIPT_DIR"/Sources/*.swift \
     -framework IOKit \
     -framework CoreFoundation \

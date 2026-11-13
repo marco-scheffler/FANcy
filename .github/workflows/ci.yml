@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Read-only token: CI only builds and tests, it never needs write access.
+permissions:
+  contents: read
+
+jobs:
+  core-tests:
+    name: Core tests
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/cache@v4
+        with:
+          path: .build
+          key: spm-${{ runner.os }}-${{ hashFiles('Package.swift') }}
+          restore-keys: spm-${{ runner.os }}-
+
+      - name: Build
+        run: swift build
+
+      - name: Test
+        run: swift test
+
+  app-build:
+    name: App build
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      # The shipping app is built by swiftc, not by the Swift package, so
+      # build it too — a passing `swift test` alone wouldn't catch a broken app.
+      - name: Build FANcy.app
+        run: bash native/build.sh

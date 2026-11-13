@@ -206,7 +206,7 @@ final class AppState: ObservableObject {
         let pct = curve.interpolate(temp: cpuTemp)
         let targetRPM = FanCurve.pctToRPM(pct, min: globalMin, max: globalMax)
 
-        if abs(targetRPM - lastSetRPM) > 50 {
+        if FanCurve.needsUpdate(targetRPM: targetRPM, lastRPM: lastSetRPM) {
             for fan in fans {
                 let rpm = FanCurve.pctToRPM(pct, min: fan.min, max: fan.max)
                 _ = SMCKit.setFanManual(fan.id, rpm: Float(rpm))

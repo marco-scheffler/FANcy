@@ -13,5 +13,8 @@ smc_helper
 # Native macOS app build output
 native/build/
 
+# Swift Package build output (swift build / swift test)
+.build/
+
 # Runtime state (fan curve is regenerated from DEFAULT_CURVE on first run)
 fan_curve.json

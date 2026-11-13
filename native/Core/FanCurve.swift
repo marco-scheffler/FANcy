@@ -73,6 +73,16 @@ struct FanCurve: Codable, Equatable {
         min + (pct / 100.0) * (max - min)
     }
 
+    /// Minimum change in target RPM before the curve rewrites the fans. Keeps
+    /// them from hunting audibly on every small temperature wiggle.
+    static let deadbandRPM: Double = 50
+
+    /// Whether a newly computed curve target differs enough from the last
+    /// applied one to be worth writing to the fans.
+    static func needsUpdate(targetRPM: Double, lastRPM: Double) -> Bool {
+        abs(targetRPM - lastRPM) > deadbandRPM
+    }
+
     // MARK: - Persistence
 
     private static var appDir: URL {

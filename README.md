@@ -11,6 +11,7 @@
 ![Platform](https://img.shields.io/badge/Platform-macOS%2013%2B-lightgrey.svg)
 ![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-required-black.svg)
 ![Built with](https://img.shields.io/badge/SwiftUI%20%C2%B7%20SMC-orange.svg)
+[![CI](https://github.com/marco-scheffler/FANcy/actions/workflows/ci.yml/badge.svg)](https://github.com/marco-scheffler/FANcy/actions/workflows/ci.yml)
 
 Manual control · interactive fan-curve editor · hysteresis — **a native macOS app that talks straight to the SMC.**
 
@@ -103,7 +104,9 @@ recover if the app was killed mid-session.
 | Path | What it is |
 |---|---|
 | `native/` | The shipping **SwiftUI app** — `build.sh` produces `FANcy.app` |
+| `native/Core/` | Pure logic (fan curve, profiles, deadband, strings) — built into the app and unit-tested |
 | `native/Sources/` | App, views, fan-curve editor, SMC kit, helper installer, Sparkle update hook |
+| `Package.swift` · `Tests/` | Swift package wrapping `native/Core` for `swift test` |
 | `app.py` · `smc_helper.c` | The original **Python/Flet** prototype and its SMC helper |
 | `fan_curve.json` | Saved curve (regenerated from the built-in default if missing) |
 
@@ -111,6 +114,17 @@ recover if the app was killed mid-session.
 
 The fan curve is stored as a list of `[temperature, speed%]` points. FANcy manages it from the UI, but
 you can edit it by hand too — if the file is missing, it falls back to the built-in `DEFAULT_CURVE`.
+
+## Tests
+
+```bash
+swift test
+```
+
+Covers the fan-curve math (interpolation, RPM mapping, the deadband that stops fans from hunting),
+the saved-curve format, and the built-in profiles — including that every profile is monotonic and
+that Silent → Balanced → Performance → Gaming really get louder at every temperature. CI runs the
+tests and a full app build on every push.
 
 ## Safety & limitations
 
