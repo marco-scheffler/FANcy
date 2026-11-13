@@ -41,9 +41,13 @@ temperature→speed curve, or hand control straight back to macOS whenever you l
 
 ## Requirements
 
-- An **Apple Silicon** MacBook (M-series), running **macOS 13+**
+- An **Apple Silicon MacBook with a fan** (the M-series MacBook **Pro**), running **macOS 13+**.
+  The fanless **MacBook Air has no fan to control**, so FANcy has nothing to do there.
 - **Admin rights** — writing fan speeds via the SMC needs a one-time privileged helper install
-  (or run with `sudo` during development)
+  (or run with `sudo` during development).
+
+> Developed and tested on an Apple Silicon MacBook Pro. SMC fan keys can differ between models, so
+> behaviour on a model I haven't tested isn't guaranteed — if something's off, please open an issue.
 
 ## Quick start
 
@@ -107,6 +111,23 @@ recover if the app was killed mid-session.
 
 The fan curve is stored as a list of `[temperature, speed%]` points. FANcy manages it from the UI, but
 you can edit it by hand too — if the file is missing, it falls back to the built-in `DEFAULT_CURVE`.
+
+## Safety & limitations
+
+⚠️ **Use at your own risk.** FANcy overrides the SMC's automatic fan control, so running the fans too
+slow under sustained load lets your Mac get warmer. A few things keep that in check:
+
+- macOS keeps its own **thermal protection** — it throttles (and ultimately shuts down) regardless of
+  what FANcy requests, so you can't cook the machine by setting fans low.
+- The curve uses **hysteresis** so fans don't oscillate around a threshold.
+- FANcy **always restores automatic control on quit** — and a crash-guard restores it on next launch
+  if the app ever exits uncleanly.
+
+Known limitations:
+
+- **No auto-update** yet — `SparkleUpdater.swift` is a wired-in integration point, not an active
+  updater. Grab new versions from [Releases](../../releases).
+- Only the **native app** is maintained for day-to-day use; `app.py` is the original prototype.
 
 ## License
 
